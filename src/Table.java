@@ -38,12 +38,6 @@ public class Table {
         String s1 = y2.get(0).getStringValue();
         // CTObject
 
-        XWPFTableRow a = table.getRow(0);   //行
-        a.setHeight(200);
-        XWPFTableCell b = a.getCell(0);     //格
-        b.setText("China");
-        System.out.println(b.getText());
-        CTTcPr x = b.getCTTc().getTcPr();
         System.out.println("A");
         docin.write(new FileOutputStream("aaa.docx"));
     }
