@@ -1,7 +1,4 @@
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFTable;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell;
-import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
 import java.io.FileInputStream;
@@ -38,7 +35,12 @@ public class Table {
         String s1 = y2.get(0).getStringValue();
         // CTObject
 
-        System.out.println("A");
         docin.write(new FileOutputStream("aaa.docx"));
+
+        List<IBodyElement> bEs = docin.getBodyElements();
+        XWPFParagraph p = (XWPFParagraph) bEs.get(65);
+        System.out.println(p.getText());
+        System.out.println(bEs.get(65));
+        System.out.println(bEs.indexOf(table));
     }
 }
