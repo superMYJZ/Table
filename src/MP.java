@@ -19,25 +19,27 @@ public class MP
     private ArrayList<XWPFParagraph> ps=new ArrayList<XWPFParagraph>();	//下面与第一个格式相同的p
     private String cs=null;							//字体
     private String eastAsia=null;					//是否黑体
-
+    private int bE;                                 //IBodyElement所指向的数字就是在IBodyElements中的位置
 
     public MP() {}
     public MP(MP mp)
     {
-        this.setbT(mp.getbTI());
+        this.setbT(mp.getbT());
         this.setPs(mp.getPs());
         this.setSzCs(mp.getSzCs());
         this.setText(mp.getText());
         this.setCs(mp.getCs());
         this.setEastAsia(mp.getEastAsia());
+        this.setbE(mp.getbE());
     }
-    public MP(ArrayList<XWPFParagraph> p, String text,int bT,String cs,String eastAsia)
+    public MP(ArrayList<XWPFParagraph> p, String text,int bT,String cs,String eastAsia,int bE)
     {
         this.ps=p;
         this.text=text;
         this.bT=bT;
         this.cs=cs;
         this.eastAsia=eastAsia;
+        this.bE=bE;
     }
     public void clear()	//初始化 恢复
     {
@@ -47,12 +49,10 @@ public class MP
         this.ps=new ArrayList<XWPFParagraph>();
         this.cs=null;
         this.eastAsia=null;
+        this.bE=0;
     }
-    String getbT()
-    {
-        return "toc "+bT;
-    }
-    int getbTI()
+    String getbTI() { return "toc "+bT;}
+    int getbT()
     {
         return bT;
     }
@@ -104,5 +104,7 @@ public class MP
     {
         this.eastAsia = eastAsia;
     }
+    public int getbE() {return bE;}
+    public void setbE(int bE) {this.bE = bE;}
 
 }

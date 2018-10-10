@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -27,7 +28,7 @@ public class T
 
     T(XWPFDocument doc) throws XmlException, IOException
     {
-
+        List<IBodyElement> bEs = doc.getBodyElements();
         List<XWPFParagraph> paras = doc.getParagraphs();
         CTStyle[] st = null;
         try
@@ -71,11 +72,11 @@ public class T
             MP mp = new MP();
             if (para.getCTP().getPPr() != null)
             {
-                boolean Is = findInSAndNew(doc, st, max, para, mp, ps);
+                boolean Is = findInSAndNew(doc, st, max, para, mp, ps,bEs);
                 // 以下处理不是标题的情况 包含在各个rpr和ppr里的对应伪标题 手动填加
                 if (!Is)
                 {
-                    findInRAndNew(para, max, mp, ps);
+                    findInRAndNew(para, max, mp, ps,bEs);
 
                 }
             } // else里面字符为空
@@ -89,7 +90,7 @@ public class T
         }
     }
     //从正文检测里面是否有学生学写的伪标题
-    private static void findInRAndNew(XWPFParagraph para, BigInteger max, MP mp, List<MP> ps) {
+    private static void findInRAndNew(XWPFParagraph para, BigInteger max, MP mp, List<MP> ps,List<IBodyElement> bEs) {
         List<XWPFRun> rs = para.getRuns();
         for (XWPFRun r : rs) {
             // System.out.println(r);
@@ -105,14 +106,16 @@ public class T
 
                 mp = new MP();
                 mp.setbT(1);
-                mp.setText(r.toString());
+                mp.setText(para.getText());
                 mp.addPs(para);
                 mp.setSzCs(new BigInteger(max.toString()));
                 mp.setEastAsia("黑体");
+                mp.setbE(bEs.indexOf(para));
                 if (r.toString().length() != 0)
-                    if (!r.toString().equals(" ") && !r.toString().equals("  ")
+                    if (!r.toString().equals(" ") && !r.toString().equals("  ")&& !r.toString().equals("")
                             && !r.toString().equals("   "))
                         ps.add(mp);
+                return;
             }
             //</editor-fold>
             //<editor-fold desc="二级标题if">
@@ -132,13 +135,14 @@ public class T
                                                 && r.toString().charAt(1) == '.') {
                                             mp = new MP();
                                             mp.setbT(2);
-                                            mp.setText(r.toString());
+                                            mp.setText(para.getText());
                                             mp.addPs(para);
                                             mp.setEastAsia("黑体");
-                                            if (!r.toString().equals(" ") && !r.toString().equals("  ")
+                                            mp.setbE(bEs.indexOf(para));
+                                            if (!r.toString().equals(" ") && !r.toString().equals("  ")&& !r.toString().equals("")
                                                     && !r.toString().equals("   "))
                                                 ps.add(mp);
-
+                                                return;
                                         }
             //</editor-fold>
             //<editor-fold desc="三级标题if">
@@ -150,12 +154,14 @@ public class T
                                     && (r.getFontSize() * 2 != max.intValue())) {
                                 mp = new MP();
                                 mp.setbT(3);
-                                mp.setText(r.toString());
+                                mp.setText(para.getText());
                                 mp.addPs(para);
+                                mp.setbE(bEs.indexOf(para));
                                 if (r.toString().length() != 0)
-                                    if (!r.toString().equals(" ") && !r.toString().equals("  ")
+                                    if (!r.toString().equals(" ") && !r.toString().equals("  ")&& !r.toString().equals("")
                                             && !r.toString().equals("   "))
                                         ps.add(mp);
+                                return;
                             }
             //</editor-fold>
             if (r.getCTR() != null)
@@ -170,14 +176,16 @@ public class T
                                         continue;
                             mp = new MP();
                             mp.setbT(1);
-                            mp.setText(r.toString());
+                            mp.setText(para.getText());
                             mp.addPs(para);
                             mp.setSzCs(new BigInteger("36"));
                             mp.setEastAsia("黑体");
+                            mp.setbE(bEs.indexOf(para));
                             if (r.toString().length() != 0)
-                                if (!r.toString().equals(" ") && !r.toString().equals("  ")
+                                if (!r.toString().equals(" ") && !r.toString().equals("  ")&& !r.toString().equals("")
                                         && !r.toString().equals("   "))
                                     ps.add(mp);
+                            return;
                         }
         }
 
@@ -186,7 +194,7 @@ public class T
     // 从Style下面提取信息 从Style中找到并且建和添加到list 在if (para.getCTP().getPPr()
     // !=null)下调用建立在最大是一级 黑体是二级 仿宋是三级
     private static boolean findInSAndNew(XWPFDocument doc, CTStyle[] st, BigInteger max, XWPFParagraph para, MP mp,
-                                         List<MP> ps) throws XmlException, IOException
+                                         List<MP> ps,List<IBodyElement> bEs) throws XmlException, IOException
 
     {   if (para.getRuns().size()!=0)if (para.getRuns().get(0)!=null)if (para.getRuns().get(0).getCTR()!=null)if (para.getRuns().get(0).getCTR().getTArray().length!=0)
         if(para.getRuns().get(0).getCTR().getTArray(0).toString().equals("摘要")){
@@ -197,8 +205,9 @@ public class T
             mp.addPs(para);
             mp.setSzCs(new BigInteger(max.toString()));
             mp.setEastAsia("黑体");
+            mp.setbE(bEs.indexOf(para));
             if (para.getText().length() != 0)
-                if (!para.getText().equals(" ") && !para.getText().equals("  ")
+                if (!para.getText().equals(" ") && !para.getText().equals("  ")&& !para.getText().equals("")
                         && !para.getText().equals("   "))
                     ps.add(mp);
             return true;
@@ -232,8 +241,9 @@ public class T
                                 mp.addPs(para);
                                 mp.setSzCs(new BigInteger(max.toString()));
                                 mp.setEastAsia("黑体");
+                                mp.setbE(bEs.indexOf(para));
                                 if (para.getText().length() != 0)
-                                    if (!para.getText().equals(" ") && !para.getText().equals("  ")
+                                    if (!para.getText().equals(" ") && !para.getText().equals("  ")&& !para.getText().equals("")
                                             && !para.getText().equals("   "))
                                         ps.add(mp);
                                 return true;
@@ -246,13 +256,14 @@ public class T
                                 mp.setText(para.getText());
                                 mp.addPs(para);
                                 mp.setEastAsia("黑体");
+                                mp.setbE(bEs.indexOf(para));
                                 if ((para.getText().length() != 0) && !((para.getText().charAt(0) == '图')
                                         && (('0' <= (para.getText().charAt(1)) && (para.getText().charAt(1)) <= '9')
                                         || ('0' <= (para.getText().charAt(2))
                                         && (para.getText().charAt(2)) <= '9'))))
                                 {
                                     // System.out.println((para.getText().charAt(0)=='图')&&(('0'<=(para.getText().charAt(1))&&(para.getText().charAt(1))<='9')||('0'<=(para.getText().charAt(2))&&(para.getText().charAt(2))<='9')));
-                                    if (!para.getText().equals(" ") && !para.getText().equals("  ")
+                                    if (!para.getText().equals(" ") && !para.getText().equals("  ")&& !para.getText().equals("")
                                             && !para.getText().equals("   "))
                                         ps.add(mp);
                                 }
@@ -269,8 +280,9 @@ public class T
                                 mp.setbT(3);
                                 mp.setText(para.getText());
                                 mp.addPs(para);
+                                mp.setbE(bEs.indexOf(para));
                                 if (para.getText().length() != 0)
-                                    if (!para.getText().equals(" ") && !para.getText().equals("  ")
+                                    if (!para.getText().equals(" ") && !para.getText().equals("  ")&& !para.getText().equals("")
                                             && !para.getText().equals("   "))
                                         ps.add(mp);
                                 return true;
